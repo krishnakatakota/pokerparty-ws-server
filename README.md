@@ -5,4 +5,4 @@
 * clone repo
 * run `npm install`
 * run `node pp-ws-server.js`
-* launch front-end app [here](github.com/krishnakatakota/pokerparty-app)
+* launch front-end app [here](https://github.com/krishnakatakota/pokerparty-app)
