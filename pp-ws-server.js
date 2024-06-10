@@ -1,17 +1,41 @@
 import { WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ port: 8080 });
+// Change this to work off of a websocket URL in an environment file when deploying!
+const server = new WebSocketServer({ port: 8080 });
 
-wss.on("connection", function connection(ws) {
+server.on("connection", function connection(ws) {
   ws.on("error", console.error);
 
-  ws.on("message", function message(data) {
-    console.log("received: %s", data);
+  ws.on("message", (message) => {
+    console.log("%s", message);
+
+	var messageString = new String(message.toString());
+
+	server.clients.forEach((client) => {
+		var containsPLStringResult = containsPLString(messageString);
+
+		console.log(containsPLStringResult);
+		if (containsPLStringResult) {
+			// 0 means game state update
+			client.send("0:" + message);
+		} else {
+			// 1 means player join request
+			client.send("1:" + message);
+		}
+	})
   });
 
   ws.on("connection", function message(conn) {
     console.log("received: %s", conn);
   });
 
-  ws.send("something");
 });
+
+function containsPLString(str) {
+	var plString = "playerList";
+	if (str.indexOf(plString) !== -1) {
+		return true;
+	} else {
+		return false;
+	}
+}
