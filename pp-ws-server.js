@@ -17,10 +17,14 @@ server.on("connection", function connection(ws) {
 		console.log(containsPLStringResult);
 		if (containsPLStringResult) {
 			// 0 means game state update
-			client.send("0:" + message);
+			if (client !== ws) {
+				client.send("0:" + message);
+			}
 		} else {
 			// 1 means player join request
-			client.send("1:" + message);
+			if (client !== ws) {
+				client.send("1:" + message);
+			}
 		}
 	})
   });
