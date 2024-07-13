@@ -1,7 +1,7 @@
 import { WebSocketServer } from "ws";
 
 // Change this to work off of a websocket URL in an environment file when deploying!
-const server = new WebSocketServer({ port: 8080 });
+const server = new WebSocketServer({ port: 8081 });
 
 server.on("connection", function connection(ws) {
   ws.on("error", console.error);
