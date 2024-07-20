@@ -12,7 +12,7 @@ const server = https.createServer({
 	key: fs.readFileSync('/etc/letsencrypt/live/pokerparty.click/privkey.pem')
 });
 
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ server });
 
 wss.on("connection", function connection(ws) {
 	ws.on("error", console.error);
@@ -47,7 +47,7 @@ wss.on("connection", function connection(ws) {
 });
 
 server.listen(8081, () => {
-	console.log('Server is listening on port 8081');
+	console.log('Server is listening on port 8081. Traffic from port 443 is being redirected to port 8081 by nginx');
 });
 
 function containsPLString(str) {
