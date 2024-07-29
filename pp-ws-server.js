@@ -8,8 +8,8 @@ import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 
 const server = https.createServer({
-	cert: fs.readFileSync('/etc/letsencrypt/live/pokerparty.click/fullchain.pem'),
-	key: fs.readFileSync('/etc/letsencrypt/live/pokerparty.click/privkey.pem')
+	cert: fs.readFileSync('/etc/letsencrypt/live/websocket.pokerparty.click/fullchain.pem'),
+	key: fs.readFileSync('/etc/letsencrypt/live/websocket.pokerparty.click/privkey.pem')
 });
 
 const wss = new WebSocketServer({ server });
@@ -20,22 +20,9 @@ wss.on("connection", function connection(ws) {
 	ws.on("message", (message) => {
 		console.log("%s", message);
 
-		var messageString = new String(message.toString());
-
 		wss.clients.forEach((client) => {
-			var containsPLStringResult = containsPLString(messageString);
-
-			console.log(containsPLStringResult);
-			if (containsPLStringResult) {
-				// 0 means game state update
-				if (client !== ws) {
-					client.send("0:" + message);
-				}
-			} else {
-				// 1 means player join request
-				if (client !== ws) {
-					client.send("1:" + message);
-				}
+			if (client !== ws) {
+				client.send("" + message);
 			}
 		})
 	});
@@ -49,12 +36,3 @@ wss.on("connection", function connection(ws) {
 server.listen(8081, () => {
 	console.log('Server is listening on port 8081. Traffic from port 443 is being redirected to port 8081 by nginx');
 });
-
-function containsPLString(str) {
-	var plString = "playerList";
-	if (str.indexOf(plString) !== -1) {
-		return true;
-	} else {
-		return false;
-	}
-}
