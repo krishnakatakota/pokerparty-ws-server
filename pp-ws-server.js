@@ -38,6 +38,25 @@ const wss = new WebSocketServer({
     }
 });
 
+wss.on("connection", function connection(ws) {
+	ws.on("error", console.error);
+
+	ws.on("message", (message) => {
+		console.log("%s", message);
+
+		wss.clients.forEach((client) => {
+			if (client !== ws) {
+				client.send("" + message);
+			}
+		})
+	});
+
+	ws.on("connection", function message(conn) {
+		console.log("received: %s", conn);
+	});
+
+});
+
 server.listen(8081, () => {
 	console.log('Server is listening on port 8081. Traffic from port 443 is being redirected to port 8081 by nginx');
 });
