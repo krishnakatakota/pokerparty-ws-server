@@ -58,11 +58,6 @@ wss.on('error', (error) => {
 });
 
 wss.on("connection", function connection(ws) {
-	console.log('New connection established:', {
-        headers: request.headers,
-        url: request.url
-    });
-
 	ws.on("error", (error) => {
         console.error('WebSocket error:', error);
     });
