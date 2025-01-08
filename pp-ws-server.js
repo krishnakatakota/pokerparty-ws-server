@@ -12,25 +12,25 @@ const server = https.createServer({
 	key: fs.readFileSync('/etc/letsencrypt/live/websocket.pokerparty.click/privkey.pem')
 });
 
-const wss = new WebSocketServer({ server });
-
-wss.on("connection", function connection(ws) {
-	ws.on("error", console.error);
-
-	ws.on("message", (message) => {
-		console.log("%s", message);
-
-		wss.clients.forEach((client) => {
-			if (client !== ws) {
-				client.send("" + message);
-			}
-		})
-	});
-
-	ws.on("connection", function message(conn) {
-		console.log("received: %s", conn);
-	});
-
+const wss = new WebSocketServer({ 
+    server,
+    // Add CORS verification
+    verifyClient: (info) => {
+        const allowedOrigins = [
+            'https://www.pokerparty.click',
+            'https://pokerparty.click',
+            // Include your development URL if needed
+            'http://localhost:4200'
+        ];
+        
+        const origin = info.origin;
+        if (!allowedOrigins.includes(origin)) {
+            console.log('Rejected WebSocket connection from origin:', origin);
+            return false;
+        }
+        console.log('Accepted WebSocket connection from origin:', origin);
+        return true;
+    }
 });
 
 server.listen(8081, () => {
