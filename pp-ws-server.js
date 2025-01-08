@@ -14,8 +14,16 @@ const server = https.createServer({
 
 const wss = new WebSocketServer({ 
     server,
-    // Add CORS verification
-    verifyClient: (info) => {
+    verifyClient: (info, callback) => {
+        console.log('Incoming connection attempt:', {
+            origin: info.origin,
+            secure: info.secure,
+            req: {
+                headers: info.req.headers,
+                url: info.req.url
+            }
+        });
+
         const allowedOrigins = [
             'https://www.pokerparty.click',
             'https://pokerparty.click',
@@ -23,19 +31,27 @@ const wss = new WebSocketServer({
         ];
         
         const origin = info.origin;
-        // Allow connections with no origin (like Postman)
         if (!origin) {
             console.log('Accepted connection with no origin (likely Postman)');
-            return true;
+            return callback(true);
         }
         
         if (!allowedOrigins.includes(origin)) {
             console.log('Rejected WebSocket connection from origin:', origin);
-            return false;
+            return callback(false);
         }
         console.log('Accepted WebSocket connection from origin:', origin);
-        return true;
+        return callback(true);
     }
+});
+
+// Add server-level error logging
+server.on('error', (error) => {
+    console.error('HTTPS Server error:', error);
+});
+
+wss.on('error', (error) => {
+    console.error('WebSocket Server error:', error);
 });
 
 wss.on("connection", function connection(ws) {
