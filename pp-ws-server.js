@@ -19,11 +19,16 @@ const wss = new WebSocketServer({
         const allowedOrigins = [
             'https://www.pokerparty.click',
             'https://pokerparty.click',
-            // Include your development URL if needed
             'http://localhost:4200'
         ];
         
         const origin = info.origin;
+        // Allow connections with no origin (like Postman)
+        if (!origin) {
+            console.log('Accepted connection with no origin (likely Postman)');
+            return true;
+        }
+        
         if (!allowedOrigins.includes(origin)) {
             console.log('Rejected WebSocket connection from origin:', origin);
             return false;
