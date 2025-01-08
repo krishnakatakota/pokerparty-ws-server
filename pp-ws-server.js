@@ -12,16 +12,21 @@ const server = https.createServer({
 	key: fs.readFileSync('/etc/letsencrypt/live/websocket.pokerparty.click/privkey.pem')
 });
 
+server.on('upgrade', (request, socket, head) => {
+    console.log('Upgrade request received:', {
+        headers: request.headers,
+        url: request.url
+    });
+});
+
 const wss = new WebSocketServer({ 
     server,
+    clientTracking: true,
     verifyClient: (info, callback) => {
-        console.log('Incoming connection attempt:', {
+        console.log('Verification attempt:', {
             origin: info.origin,
             secure: info.secure,
-            req: {
-                headers: info.req.headers,
-                url: info.req.url
-            }
+            headers: info.req.headers
         });
 
         const allowedOrigins = [
@@ -30,18 +35,16 @@ const wss = new WebSocketServer({
             'http://localhost:4200'
         ];
         
-        const origin = info.origin;
-        if (!origin) {
-            console.log('Accepted connection with no origin (likely Postman)');
-            return callback(true);
-        }
+        const origin = info.origin || info.req.headers.origin;
         
-        if (!allowedOrigins.includes(origin)) {
-            console.log('Rejected WebSocket connection from origin:', origin);
-            return callback(false);
+        // Allow Postman (no origin) or valid origins
+        if (!origin || allowedOrigins.includes(origin)) {
+            console.log('Accepting connection from:', origin || 'No origin (Postman)');
+            callback(true);
+        } else {
+            console.log('Rejecting connection from:', origin);
+            callback(false);
         }
-        console.log('Accepted WebSocket connection from origin:', origin);
-        return callback(true);
     }
 });
 
@@ -55,7 +58,14 @@ wss.on('error', (error) => {
 });
 
 wss.on("connection", function connection(ws) {
-	ws.on("error", console.error);
+	console.log('New connection established:', {
+        headers: request.headers,
+        url: request.url
+    });
+
+	ws.on("error", (error) => {
+        console.error('WebSocket error:', error);
+    });
 
 	ws.on("message", (message) => {
 		console.log("%s", message);
@@ -71,6 +81,9 @@ wss.on("connection", function connection(ws) {
 		console.log("received: %s", conn);
 	});
 
+	ws.on("close", (code, reason) => {
+        console.log('Connection closed:', { code, reason });
+    });
 });
 
 server.listen(8081, () => {
